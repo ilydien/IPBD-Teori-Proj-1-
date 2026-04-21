@@ -91,6 +91,10 @@ services:
   garage:
     image: docker.io/dxflrs/garage:v2.2.0
     restart: always
+    environment:
+      GARAGE_RPC_SECRET: "${GARAGE_RPC_SECRET:-923968fc0b00ada8a998281e63dc340744ce8f430808bf95d9f0d80270e58a82}"
+      GARAGE_ADMIN_SECRET: "${GARAGE_ADMIN_SECRET:-superadminsecret}"
+      GARAGE_DEFAULT_BUCKET: "${GARAGE_BUCKET:-prefectbucket}"
     env_file: .env
     ports:
       - "${HOST_IP-127.0.0.1}:3900:3900"
