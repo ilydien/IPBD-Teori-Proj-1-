@@ -120,7 +120,7 @@ services:
     ports:
       - "${HOST_IP-127.0.0.1}:5433:5432"
     volumes:
-      - ./lakehouse/postgres:/var/lib/postgresql/data
+      - ./lakehouse/postgres:/var/lib/postgresql
     healthcheck:
       test:
         [
