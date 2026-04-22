@@ -109,6 +109,18 @@ services:
       - ./lakehouse/garage/var/lib/garage/data:/var/lib/garage/data
     command: /garage server --single-node --default-bucket
 
+  garage-webui:
+    image: docker.io/khairul169/garage-webui:1.1.0
+    container_name: garage-webui
+    restart: unless-stopped
+    volumes:
+      - ./lakehouse/garage/etc/garage.toml:/etc/garage.toml:ro
+    ports:
+      - "${HOST_IP-127.0.0.1}:3909:3909"
+    environment:
+      API_BASE_URL: "http://garage:3903"
+      S3_ENDPOINT_URL: "http://garage:3900"
+
   postgres-lakehouse:
     image: docker.io/postgres:18.3-alpine3.23
     restart: always
