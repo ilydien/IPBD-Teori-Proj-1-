@@ -1,20 +1,30 @@
 services:
-  postgres:
+  postgres-prefect:
     image: docker.io/postgres:17-alpine3.23
     environment:
       POSTGRES_USER: prefect
       POSTGRES_PASSWORD: prefect
       POSTGRES_DB: prefect
     volumes:
-      - ./prefect/postgres_data:/var/lib/postgresql/data
+      - ./prefect/postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U prefect"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  redis:
+  dragonfly:
     image: ghcr.io/dragonflydb/dragonfly:v1.38.0
+    expose:
+      - 6379
+    restart: always
+    volumes:
+      - ./prefect/dragonfly:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     command:
       [
         "--proactor_threads=2",
@@ -22,35 +32,27 @@ services:
         "--bind=0.0.0.0",
         "--port=6379",
       ]
-    volumes:
-      - ./prefect/redis_data:/data
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   prefect-server:
     image: docker.io/prefecthq/prefect:3-latest
     depends_on:
-      postgres:
+      postgres-prefect:
         condition: service_healthy
-      redis:
+      dragonfly:
         condition: service_healthy
     environment:
-      PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://prefect:prefect@postgres:5432/prefect
+      PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://prefect:prefect@postgres-prefect:5432/prefect
       PREFECT_SERVER_API_HOST: 0.0.0.0
       PREFECT_SERVER_UI_API_URL: http://${HOST_IP-127.0.0.1}:4200/api
       PREFECT_MESSAGING_BROKER: prefect_redis.messaging
       PREFECT_MESSAGING_CACHE: prefect_redis.messaging
-      PREFECT_REDIS_MESSAGING_HOST: redis
+      PREFECT_REDIS_MESSAGING_HOST: dragonfly
       PREFECT_REDIS_MESSAGING_PORT: 6379
       PREFECT_REDIS_MESSAGING_DB: 0
     env_file: .env
     command: prefect server start --no-services
     ports:
       - "${HOST_IP-127.0.0.1}:4200:4200"
-
     healthcheck:
       test:
         [
@@ -70,10 +72,10 @@ services:
       prefect-server:
         condition: service_healthy
     environment:
-      PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://prefect:prefect@postgres:5432/prefect
+      PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://prefect:prefect@postgres-prefect:5432/prefect
       PREFECT_MESSAGING_BROKER: prefect_redis.messaging
       PREFECT_MESSAGING_CACHE: prefect_redis.messaging
-      PREFECT_REDIS_MESSAGING_HOST: redis
+      PREFECT_REDIS_MESSAGING_HOST: dragonfly
       PREFECT_REDIS_MESSAGING_PORT: 6379
       PREFECT_REDIS_MESSAGING_DB: 0
     command: prefect server services start
@@ -92,9 +94,11 @@ services:
     image: docker.io/dxflrs/garage:v2.2.0
     restart: always
     environment:
-      GARAGE_RPC_SECRET: "${GARAGE_RPC_SECRET:-923968fc0b00ada8a998281e63dc340744ce8f430808bf95d9f0d80270e58a82}"
-      GARAGE_ADMIN_SECRET: "${GARAGE_ADMIN_SECRET:-superadminsecret}"
-      GARAGE_DEFAULT_BUCKET: "${GARAGE_BUCKET:-prefectbucket}"
+      GARAGE_RPC_SECRET: "${GARAGE_RPC_SECRET-923968fc0b00ada8a998281e63dc340744ce8f430808bf95d9f0d80270e58a82}"
+      GARAGE_ADMIN_SECRET: "${GARAGE_ADMIN_SECRET-superadminsecret}"
+      GARAGE_DEFAULT_BUCKET: "${GARAGE_BUCKET-lakebucket}"
+      GARAGE_DEFAULT_ACCESS_KEY: "GK${GARAGE_DEFAULT_ACCESS_KEY-ff320797c25621b67c1d98d84d46a245}"
+      GARAGE_DEFAULT_SECRET_KEY: "${GARAGE_DEFAULT_SECRET_KEY-4838a95b506f26e0f39fd9447e69fbfc83b85d37099012eaed749b2ebcc0a87b}"
     env_file: .env
     ports:
       - "${HOST_IP-127.0.0.1}:3900:3900"
@@ -103,6 +107,7 @@ services:
       - ./lakehouse/garage/etc:/etc
       - ./lakehouse/garage/var/lib/garage/meta:/var/lib/garage/meta
       - ./lakehouse/garage/var/lib/garage/data:/var/lib/garage/data
+    command: /garage server --single-node --default-bucket
 
   postgres-lakehouse:
     image: docker.io/postgres:18.3-alpine3.23
@@ -115,7 +120,7 @@ services:
     ports:
       - "${HOST_IP-127.0.0.1}:5433:5432"
     volumes:
-      - ./lakehouse:/var/lib/postgresql/data
+      - ./lakehouse/postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -159,9 +164,6 @@ services:
       - ./metabase:/var/lib/postgresql/data
     networks:
       - metanet1
-
-volumes:
-  redis_data:
 
 networks:
   metanet1:
