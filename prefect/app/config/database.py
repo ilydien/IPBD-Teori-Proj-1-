@@ -66,10 +66,14 @@ class DatabaseManager:
             self._engine.dispose()
             self._engine = None
 
-    def get_table_count(self, table_name: str) -> int:
+    def get_table_count(self, schema_name: str | None, table_name: str) -> int:
         """Get the number of rows in a table."""
         with self.get_connection() as connection:
-            result = connection.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
+            result = connection.execute(
+                text(
+                    f"SELECT COUNT(*) FROM {f'{schema_name}.' if schema_name else ''}{table_name}"
+                )
+            )
             return result.scalar()
 
 
