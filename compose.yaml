@@ -34,12 +34,15 @@ services:
       ]
 
   prefect-server:
-    image: docker.io/prefecthq/prefect:3-latest
+    build: ./prefect
+    working_dir: /prefect
     depends_on:
       postgres-prefect:
         condition: service_healthy
       dragonfly:
         condition: service_healthy
+    ports:
+      - "${HOST_IP-127.0.0.1}:4200:4200"
     environment:
       PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://prefect:prefect@postgres-prefect:5432/prefect
       PREFECT_SERVER_API_HOST: 0.0.0.0
@@ -50,9 +53,9 @@ services:
       PREFECT_REDIS_MESSAGING_PORT: 6379
       PREFECT_REDIS_MESSAGING_DB: 0
     env_file: .env
+    volumes:
+      - ./prefect/app:/prefect:z
     command: prefect server start --no-services
-    ports:
-      - "${HOST_IP-127.0.0.1}:4200:4200"
     healthcheck:
       test:
         [
@@ -67,7 +70,8 @@ services:
       start_period: 60s
 
   prefect-services:
-    image: docker.io/prefecthq/prefect:3-latest
+    build: ./prefect
+    working_dir: /prefect
     depends_on:
       prefect-server:
         condition: service_healthy
@@ -79,10 +83,12 @@ services:
       PREFECT_REDIS_MESSAGING_PORT: 6379
       PREFECT_REDIS_MESSAGING_DB: 0
     env_file: .env
+    volumes:
+      - ./prefect/app:/prefect:z
     command: prefect server services start
 
   prefect-worker:
-    image: docker.io/prefecthq/prefect:3-latest
+    build: ./prefect
     working_dir: /prefect
     depends_on:
       prefect-server:
