@@ -34,6 +34,13 @@ class Settings:
     DEFAULT_LIMIT: int = int(os.getenv("DEFAULT_LIMIT", "20"))
 
     # ============================================================
+    # API Fetch Settings
+    # ============================================================
+    API_TIMEOUT: int = int(os.getenv("API_TIMEOUT", "30"))
+    API_MAX_RETRIES: int = int(os.getenv("API_MAX_RETRIES", "3"))
+    API_RETRY_DELAYS: list[int] = [2, 5, 10]
+
+    # ============================================================
     # Derived Properties
     # ============================================================
     @classmethod
@@ -49,11 +56,11 @@ class Settings:
     def validate_db_settings(cls) -> bool:
         """Validate all required database settings are present."""
         required = [
-            "LAKEHOUSE_USER",
-            "LAKEHOUSE_PASSWORD",
-            "LAKEHOUSE_HOST",
-            "LAKEHOUSE_PORT",
-            "LAKEHOUSE_NAME",
+            "POSTGRES_LAKEHOUSE_USER",
+            "POSTGRES_LAKEHOUSE_PASSWORD",
+            "POSTGRES_LAKEHOUSE_HOST",
+            "POSTGRES_LAKEHOUSE_PORT",
+            "POSTGRES_LAKEHOUSE_NAME",
         ]
         missing = [var for var in required if not getattr(cls, var)]
 
