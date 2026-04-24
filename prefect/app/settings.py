@@ -16,11 +16,11 @@ class Settings:
     # ============================================================
     # Database Settings
     # ============================================================
-    LAKEHOUSE_HOST: str = os.getenv("POSTGREAS_LAKEHOUSE_HOST", "localhost")
-    LAKEHOUSE_PORT: str = os.getenv("POSTGREAS_LAKEHOUSE_PORT", "5432")
-    LAKEHOUSE_USER: str = os.getenv("POSTGREAS_LAKEHOUSE_USER", "postgres")
-    LAKEHOUSE_PASSWORD: str = os.getenv("POSTGREAS_LAKEHOUSE_PASSWORD", "postgres")
-    LAKEHOUSE_NAME: str = os.getenv("POSTGREAS_LAKEHOUSE_DB", "postgres")
+    LAKEHOUSE_HOST: str = os.getenv("POSTGRES_LAKEHOUSE_HOST", "localhost")
+    LAKEHOUSE_PORT: str = os.getenv("POSTGRES_LAKEHOUSE_PORT", "5432")
+    LAKEHOUSE_USER: str = os.getenv("POSTGRES_LAKEHOUSE_USER", "postgres")
+    LAKEHOUSE_PASSWORD: str = os.getenv("POSTGRES_LAKEHOUSE_PASSWORD", "postgres")
+    LAKEHOUSE_NAME: str = os.getenv("POSTGRES_LAKEHOUSE_DB", "postgres")
 
     DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "5"))
     DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "10"))
