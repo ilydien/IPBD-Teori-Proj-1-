@@ -98,11 +98,11 @@ services:
     image: docker.io/dxflrs/garage:v2.3.0
     restart: always
     environment:
-      GARAGE_RPC_SECRET: "${GARAGE_RPC_SECRET-923968fc0b00ada8a998281e63dc340744ce8f430808bf95d9f0d80270e58a82}"
+      GARAGE_RPC_SECRET: "${GARAGE_RPC_SECRET-garagerpcsecretgaragerpcsecretgaragerpcsecretgaragerpcsecretgara}"
       GARAGE_ADMIN_SECRET: "${GARAGE_ADMIN_SECRET-superadminsecret}"
       GARAGE_DEFAULT_BUCKET: "${GARAGE_BUCKET-lakebucket}"
-      GARAGE_DEFAULT_ACCESS_KEY: "GK${GARAGE_DEFAULT_ACCESS_KEY-ff320797c25621b67c1d98d84d46a245}"
-      GARAGE_DEFAULT_SECRET_KEY: "${GARAGE_DEFAULT_SECRET_KEY-4838a95b506f26e0f39fd9447e69fbfc83b85d37099012eaed749b2ebcc0a87b}"
+      GARAGE_DEFAULT_ACCESS_KEY: "GK${GARAGE_DEFAULT_ACCESS_KEY-garagedefaultaccesskeygaragedefa}"
+      GARAGE_DEFAULT_SECRET_KEY: "${GARAGE_DEFAULT_SECRET_KEY-garagedefaultsecretkeygaragedefaultsecretkeygaragedefaultsecretk}"
     env_file: .env
     ports:
       - "${HOST_IP-127.0.0.1}:3900:3900"
