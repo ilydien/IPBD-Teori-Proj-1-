@@ -82,13 +82,15 @@ services:
 
   prefect-worker:
     image: docker.io/prefecthq/prefect:3-latest
+    working_dir: /prefect
     depends_on:
       prefect-server:
         condition: service_healthy
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
+      PREFECT_WORKING_DIR: /prefect
     volumes:
-      - ./prefect/app:/opt/prefect:z
+      - ./prefect/app:/prefect:z
     command: prefect worker start --pool local-pool
     restart: on-failure
 
