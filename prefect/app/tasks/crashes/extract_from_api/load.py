@@ -2,6 +2,7 @@ from typing import Any
 from prefect import task
 
 import pandas as pd
+from sqlalchemy.dialects.postgresql import JSONB
 
 from settings import settings
 from config.database import db_manager
@@ -17,11 +18,13 @@ from config.database import db_manager
 async def insert_raw_to_database(
     tabular_data: pd.DataFrame,
     schema_name: str = "bronze",
-    table_name: str = "crashes",
+    table_name: str = "fars_crashes",
 ) -> int:
     """
     Hybrid approach: Try Prefect Block first, fallback to .env.
     """
+    dtype = {"results": JSONB}
+    db_manager.create_bronze_fars_crashes_table()
     try:
         from prefect_sqlalchemy import SqlAlchemyConnector
 
@@ -34,6 +37,7 @@ async def insert_raw_to_database(
                 con=connection.engine,
                 if_exists="append",
                 index=False,
+                dtype=dtype,
             )
         print("Used Prefect block (production mode)")
 
@@ -46,9 +50,11 @@ async def insert_raw_to_database(
         with db_manager.get_connection() as connection:
             _ = tabular_data.to_sql(
                 name=table_name,
+                schema=schema_name,
                 con=connection,
                 if_exists="append",
                 index=False,
+                dtype=dtype,
             )
         print("Used .env configuration (local mode)")
 

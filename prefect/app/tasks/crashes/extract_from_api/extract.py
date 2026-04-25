@@ -1,5 +1,6 @@
 """Extract tasks for fetching data from APIs."""
 
+import requests
 from datetime import timedelta
 from typing import Any
 
@@ -9,12 +10,19 @@ from prefect import task
 from prefect.tasks import task_input_hash
 
 from settings import settings
-from config.api import APIClient
+# from config.api import APIClient
+
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "application/json",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Referer": "https://crashviewer.nhtsa.dot.gov/",
+}
 
 
 @task(
     name="fetch_crash_incidents",
-    retries=settings.API_MAX_RETRIES,
+    retries=0,
     retry_delay_seconds=settings.API_RETRY_DELAYS,
     log_prints=True,
     cache_key_fn=task_input_hash,
@@ -46,10 +54,12 @@ def fetch_crash_incidents(
     print(f"Fetching data from {url}...")
 
     try:
-        with httpx.Client(timeout=settings.API_TIMEOUT) as client:
-            response = client.get(url, params=params)
-            response.raise_for_status()
-            raw_json = response.json()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        }
+        response = requests.get(url, params=params, headers=headers)
+        response.raise_for_status()
+        raw_json = response.json()
     except httpx.HTTPStatusError as e:
         print(f"HTTP error: {e.response.status_code} - {e.response.text}")
         raise

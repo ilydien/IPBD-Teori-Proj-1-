@@ -17,12 +17,12 @@ def unwrap_api_response(
 
     return pd.DataFrame.from_dict(
         {
-            "start_year": params["fromYear"],
-            "end_year": params["toYear"],
-            "state_code": params["stateCode"],
-            "state_name": results_array[0].get("STATENAME") if results_array else None,
-            "count": api_response.get("Count", 0),
-            "message": api_response.get("Message", ""),
-            "results": results_array,
+            "start_year": [params["FromYear"]],
+            "end_year": [params["ToYear"]],
+            "state_code": [params["state"]],
+            "state_name": [results_array[0].get("STATENAME") if results_array else None],
+            "count": [api_response.get("Count", 0)],
+            "message": [api_response.get("Message", "")],
+            "results": [results_array],  # Pass as list, pandas/to_sql handles JSONB
         }
     )
