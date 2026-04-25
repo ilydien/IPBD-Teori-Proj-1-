@@ -45,10 +45,7 @@ def flatten_crashes_json(bronze_df: pd.DataFrame) -> pd.DataFrame:
             crashes = []
 
         for crash in crashes:
-            flattened = {
-                "state_code": state_code,
-                "state_name": state_name,
-            }
+            flattened = {}
             for key, value in crash.items():
                 normalized_key = key.lower()
                 if value == "" or value is None:
@@ -63,7 +60,11 @@ def flatten_crashes_json(bronze_df: pd.DataFrame) -> pd.DataFrame:
                             flattened[normalized_key] = float(value)
                         except (ValueError, TypeError):
                             flattened[normalized_key] = value
-
+            
+            # Add state info from row's metadata
+            flattened["state_code"] = state_code
+            flattened["state_name"] = state_name
+            
             all_crashes.append(flattened)
 
     df = pd.DataFrame(all_crashes)

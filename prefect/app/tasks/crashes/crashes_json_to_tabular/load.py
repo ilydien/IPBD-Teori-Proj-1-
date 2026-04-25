@@ -82,7 +82,38 @@ def get_columns_sql(df: pd.DataFrame) -> str:
 
 def get_columns_list(df: pd.DataFrame) -> list[str]:
     """Get list of column names for INSERT."""
-    return [col for col in df.columns if col != "id"]
+    column_mapping = {
+        "state": "state_code",
+        "statename": "state_name",
+    }
+    valid_columns = {
+        "st_case", "caseyear", "state_code", "state_name",
+        "county", "city", "day", "month", "year", "hour", "minute", "day_week", "day_weekname",
+        "func_sys", "func_sysname", "harm_ev", "harm_evname",
+        "hosp_hr", "hosp_hrname", "hosp_mn", "hosp_mnname",
+        "route", "routename", "sp_jur", "sp_jurname", "arr_min", "arr_minname",
+        "rur_urb", "rur_urbname", "typ_int", "typ_intname",
+        "weather", "weathername", "lgt_cond", "lgt_condname",
+        "fatals", "permvit", "pernotmvit", "ve_total", "ve_forms", "persons", "pvh_invl",
+        "latitude", "longitud", "milept", "mileptname", "tway_id", "tway_id2",
+        "rd_owner", "rd_ownername", "rel_road", "rel_roadname",
+        "reljct1", "reljct1name", "reljct2", "reljct2name",
+        "wrk_zone", "wrk_zonename", "man_coll", "man_collname",
+        "not_hour", "not_hourname", "not_min", "not_minname", "arr_hour", "arr_hourname",
+        "sch_bus", "sch_busname", "road_fnc", "road_fncname",
+        "cityname", "countyname", "hourname", "monthname", "minutename",
+        "weather1", "weather1name", "weather2", "weather2name",
+        "drunk_dr", "nhs", "nhsname",
+        "cf1", "cf1name", "cf2", "cf2name", "cf3", "cf3name",
+        "peds", "rail", "railname", "dayname",
+    }
+    filtered_cols = []
+    for col in df.columns:
+        if col in column_mapping:
+            filtered_cols.append(column_mapping[col])
+        elif col in valid_columns:
+            filtered_cols.append(col)
+    return filtered_cols
 
 
 @task(
@@ -107,7 +138,37 @@ async def upsert_to_silver(tabular_data: pd.DataFrame) -> int:
     table_name = "parsed_crashes_array"
     schema_name = "silver"
 
-    columns = get_columns_list(tabular_data)
+    column_mapping = {
+        "state": "state_code",
+        "statename": "state_name",
+    }
+    valid_columns = {
+        "st_case", "caseyear", "state_code", "state_name",
+        "county", "city", "day", "month", "year", "hour", "minute", "day_week", "day_weekname",
+        "func_sys", "func_sysname", "harm_ev", "harm_evname",
+        "hosp_hr", "hosp_hrname", "hosp_mn", "hosp_mnname",
+        "route", "routename", "sp_jur", "sp_jurname", "arr_min", "arr_minname",
+        "rur_urb", "rur_urbname", "typ_int", "typ_intname",
+        "weather", "weathername", "lgt_cond", "lgt_condname",
+        "fatals", "permvit", "pernotmvit", "ve_total", "ve_forms", "persons", "pvh_invl",
+        "latitude", "longitud", "milept", "mileptname", "tway_id", "tway_id2",
+        "rd_owner", "rd_ownername", "rel_road", "rel_roadname",
+        "reljct1", "reljct1name", "reljct2", "reljct2name",
+        "wrk_zone", "wrk_zonename", "man_coll", "man_collname",
+        "not_hour", "not_hourname", "not_min", "not_minname", "arr_hour", "arr_hourname",
+        "sch_bus", "sch_busname", "road_fnc", "road_fncname",
+        "cityname", "countyname", "hourname", "monthname", "minutename",
+        "weather1", "weather1name", "weather2", "weather2name",
+        "drunk_dr", "nhs", "nhsname",
+        "cf1", "cf1name", "cf2", "cf2name", "cf3", "cf3name",
+        "peds", "rail", "railname", "dayname",
+    }
+
+    for old_col, new_col in column_mapping.items():
+        if old_col in tabular_data.columns and new_col not in tabular_data.columns:
+            tabular_data.rename(columns={old_col: new_col}, inplace=True)
+
+    columns = [col for col in tabular_data.columns if col in valid_columns]
 
     columns_sql = ", ".join(columns)
     placeholders = ", ".join([f":{col}" for col in columns])
@@ -118,6 +179,8 @@ async def upsert_to_silver(tabular_data: pd.DataFrame) -> int:
             if col not in ("id", "created_at")
         ]
     )
+
+    tabular_data = tabular_data[columns]
 
     upsert_sql = text(f"""
         INSERT INTO {schema_name}.{table_name} ({columns_sql})
