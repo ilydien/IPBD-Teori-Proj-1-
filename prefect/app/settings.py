@@ -56,11 +56,11 @@ class Settings:
     def validate_db_settings(cls) -> bool:
         """Validate all required database settings are present."""
         required = [
-            "POSTGRES_LAKEHOUSE_USER",
-            "POSTGRES_LAKEHOUSE_PASSWORD",
-            "POSTGRES_LAKEHOUSE_HOST",
-            "POSTGRES_LAKEHOUSE_PORT",
-            "POSTGRES_LAKEHOUSE_NAME",
+            "LAKEHOUSE_USER",
+            "LAKEHOUSE_PASSWORD",
+            "LAKEHOUSE_HOST",
+            "LAKEHOUSE_PORT",
+            "LAKEHOUSE_NAME",
         ]
         missing = [var for var in required if not getattr(cls, var)]
 
