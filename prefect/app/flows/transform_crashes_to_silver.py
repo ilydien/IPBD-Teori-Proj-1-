@@ -8,23 +8,47 @@ from tasks.crashes.crashes_json_to_tabular.load import upsert_to_silver
 from config.database import db_manager
 
 
-@flow(name="transform_crashes_to_silver", log_prints=True)
-def transform_crashes_to_silver(
-    start_year: int | None = None,
-    end_year: int | None = None,
-    state_code: int | list[int] | None = None,
+def execute_tasks(
+    state_code: int | None = None,
+    year: int | None = None,
 ) -> int:
-    """
-    Transform crash data from Bronze to Silver layer.
-    """
     bronze_df = select_from_bronze_crashes(
-        start_year=start_year,
-        end_year=end_year,
+        year=year,
         state_code=state_code,
     )
 
     flattened_df = flatten_crashes_json(bronze_df)
 
     upserted_count = upsert_to_silver(flattened_df)
+    return upserted_count
+
+
+@flow(name="transform_crashes_to_silver", log_prints=True)
+def transform_crashes_to_silver(
+    state_code: int | None = None,
+    year: int | None = None,
+) -> int:
+    """
+    Transform crash data from Bronze to Silver layer.
+    """
+    upserted_count = execute_tasks(state_code, year)
 
     return upserted_count
+
+
+@flow(name="transform_crashes_to_silver_range", log_prints=True)
+def transform_crashes_to_silver_range(
+    state_code: int | None = None,
+    start_year: int | None = None,
+    end_year: int | None = None,
+) -> int:
+    """
+    Transform crash data from Bronze to Silver layer.
+    """
+    total_upserted_count = 0
+
+    for year in range(start_year, end_year + 1):
+        upserted_count = execute_tasks(state_code, year)
+        total_upserted_count += upserted_count
+
+    return total_upserted_count

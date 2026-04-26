@@ -21,7 +21,7 @@ def flatten_crashes_json(bronze_df: pd.DataFrame) -> pd.DataFrame:
     each crash record into individual columns.
 
     Args:
-        bronze_df: DataFrame from bronze with columns: start_year, end_year, state_code, state_name, count, message, results
+        bronze_df: DataFrame from bronze with columns: year, state_code, state_name, count, message, results
 
     Returns:
         DataFrame with all crash fields flattened (one row per crash record)
@@ -29,8 +29,7 @@ def flatten_crashes_json(bronze_df: pd.DataFrame) -> pd.DataFrame:
     all_crashes = []
 
     for _, row in bronze_df.iterrows():
-        start_year = row["start_year"]
-        end_year = row["end_year"]
+        year = row["year"]
         state_code = row["state_code"]
         state_name = row["state_name"]
 
@@ -60,11 +59,10 @@ def flatten_crashes_json(bronze_df: pd.DataFrame) -> pd.DataFrame:
                             flattened[normalized_key] = float(value)
                         except (ValueError, TypeError):
                             flattened[normalized_key] = value
-            
-            # Add state info from row's metadata
+
             flattened["state_code"] = state_code
             flattened["state_name"] = state_name
-            
+
             all_crashes.append(flattened)
 
     df = pd.DataFrame(all_crashes)

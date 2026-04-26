@@ -23,8 +23,7 @@ from config.database import db_manager
 def select_from_bronze_crashes(
     schema_name: str = "bronze",
     table_name: str = "fars_crashes",
-    start_year: int | None = None,
-    end_year: int | None = None,
+    year: int | None = None,
     state_code: int | list[int] | None = None,
 ) -> pd.DataFrame:
     """
@@ -33,23 +32,21 @@ def select_from_bronze_crashes(
     Args:
         schema_name: Schema name (default: bronze)
         table_name: Table name (default: fars_crashes)
-        start_year: Filter by start_year
-        end_year: Filter by end_year
+        year: Filter by year
         state_code: Filter by state_code(s)
 
     Returns:
-        DataFrame with columns: start_year, end_year, state_code, state_name, count, message, results
+        DataFrame with columns:  year, state_code, state_name, count, message, results
     """
-    query = text(f'SELECT start_year, end_year, state_code, state_name, count, message, results FROM {schema_name}.{table_name}')
+    query = text(
+        f"SELECT year, state_code, state_name, count, message, results FROM {schema_name}.{table_name}"
+    )
     params = {}
 
     conditions = []
-    if start_year is not None:
-        conditions.append("start_year >= :start_year")
-        params["start_year"] = start_year
-    if end_year is not None:
-        conditions.append("end_year <= :end_year")
-        params["end_year"] = end_year
+    if year is not None:
+        conditions.append("year = :year")
+        params["year"] = year
     if state_code is not None:
         if isinstance(state_code, list):
             conditions.append("state_code IN :state_codes")
@@ -65,6 +62,16 @@ def select_from_bronze_crashes(
         result = connection.execute(query, params)
         rows = result.fetchall()
 
-    df = pd.DataFrame(rows, columns=["start_year", "end_year", "state_code", "state_name", "count", "message", "results"])
+    df = pd.DataFrame(
+        rows,
+        columns=[
+            "year",
+            "state_code",
+            "state_name",
+            "count",
+            "message",
+            "results",
+        ],
+    )
     print(f"Loaded {len(df)} rows from bronze.{table_name}")
     return df
