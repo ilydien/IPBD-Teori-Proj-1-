@@ -6,23 +6,15 @@ from tasks.crashes.extract_from_api.transform import unwrap_api_response
 from tasks.crashes.extract_from_api.load import insert_raw_to_database
 
 
-@flow(name="extract_crash_data_to_bronze", log_prints=True)
-def extract_crash_data_to_bronze(
-    state_code: int, start_year: int, end_year: int, format_data: str = "json"
-) -> int:
-    """
-    Extract crash data from FARS API and load to Bronze layer.
-    """
+def execute_tasks(state_code: int, year: int, format_data: str = "json") -> int:
     api_response = fetch_crash_incidents(
         stateCode=state_code,
-        startYear=start_year,
-        endYear=end_year,
+        year=year,
         formatData=format_data,
     )
 
     params = {
-        "FromYear": start_year,
-        "ToYear": end_year,
+        "year": year,
         "state": state_code,
     }
 
@@ -36,5 +28,32 @@ def extract_crash_data_to_bronze(
         schema_name="bronze",
         table_name="fars_crashes",
     )
+
+    return inserted_count
+
+
+@flow(name="extract_crash_data_to_bronze_range", log_prints=True)
+def extract_crash_data_to_bronze_range(
+    state_code: int, start_year: int, end_year: int, format_data: str = "json"
+) -> int:
+    """
+    Extract crash data from FARS API and load to Bronze layer.
+    """
+    total_inserted_count = 0
+    for year in range(start_year, end_year + 1):
+        inserted_count = execute_tasks(state_code, year, format_data)
+        total_inserted_count += inserted_count
+
+    return total_inserted_count
+
+
+@flow(name="extract_crash_data_to_bronze", log_prints=True)
+def extract_crash_data_to_bronze(
+    state_code: int, year: int, format_data: str = "json"
+) -> int:
+    """
+    Extract crash data from FARS API and load to Bronze layer.
+    """
+    inserted_count = execute_tasks(state_code, year, format_data)
 
     return inserted_count

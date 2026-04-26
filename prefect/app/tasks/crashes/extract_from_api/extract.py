@@ -30,7 +30,7 @@ headers = {
     tags=["extract", "api"],
 )
 def fetch_crash_incidents(
-    stateCode: int, startYear: int, endYear: int, formatData: str = "json"
+    stateCode: int, year: int, formatData: str = "json"
 ) -> list[dict[str, Any]]:
     """
     Fetch posts from a REST API endpoint.
@@ -45,8 +45,8 @@ def fetch_crash_incidents(
     url = "https://crashviewer.nhtsa.dot.gov/crashviewer/CrashAPI/FARSData/GetFARSData"
     params = {
         "dataset": "Accident",
-        "FromYear": startYear,
-        "ToYear": endYear,
+        "FromYear": year,
+        "ToYear": year,
         "state": stateCode,
         "format": formatData,
     }
@@ -68,7 +68,7 @@ def fetch_crash_incidents(
         raise
 
     print(
-        f"Successfully fetched crashes in state code {stateCode} from year {startYear} to year {endYear}, total {len(raw_json.get('Results', [[]])[0])} crashes."
+        f"Successfully fetched crashes in state code {stateCode} in year {year}, total {len(raw_json.get('Results', [[]])[0])} crashes."
     )
     return raw_json
 
