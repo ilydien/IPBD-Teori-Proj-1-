@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: prefect
       POSTGRES_DB: prefect
     volumes:
-      - ./prefect/postgres:/var/lib/postgresql/data
+      - ./prefect_app/postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U prefect"]
       interval: 5s
@@ -19,7 +19,7 @@ services:
       - 6379
     restart: always
     volumes:
-      - ./prefect/dragonfly:/data
+      - ./prefect_app/dragonfly:/data
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping"]
       interval: 5s
@@ -90,7 +90,7 @@ services:
       PREFECT_API_URL: http://prefect-server:4200/api
       PREFECT_WORKING_DIR: /prefect
     volumes:
-      - ./prefect/app:/prefect:z
+      - ./prefect_app/app:/prefect:z
     command: prefect worker start --pool local-pool
     restart: on-failure
 
