@@ -8,6 +8,7 @@ sys.path.insert(0, "/prefect")
 from prefect import flow
 
 from tasks.crashes.gold.create_gold import create_gold_table, populate_gold_table, get_gold_count
+from tasks.crashes.gold.correlation import create_correlation_table, calculate_weather_crash_correlation
 
 
 @flow(name="build_gold_layer", log_prints=True)
@@ -25,21 +26,26 @@ def build_gold_layer(
     Returns:
         Dict with result summary
     """
-    # Step 1: Create Gold table
+    # Step1: Create Gold tables
     create_gold_table()
+    create_correlation_table()
 
-    # Step 2: Populate Gold table
+    # Step2: Populate Gold table
     upserted = populate_gold_table(
         year=year,
         state_name=state_name,
     )
 
-    # Step 3: Get total count
+    # Step3: Calculate weather-crash correlation
+    correlation_count = calculate_weather_crash_correlation()
+
+    # Step4: Get total count
     total_count = get_gold_count()
 
     return {
         "upserted": upserted,
         "total_records": total_count,
+        "correlation_categories": correlation_count,
     }
 
 
