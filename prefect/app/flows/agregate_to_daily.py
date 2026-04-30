@@ -13,6 +13,10 @@ def execute_tasks(
     state_code: int | None = None,
     year: int | None = None,
 ) -> int:
+    from tasks.crashes.agregate_to_daily.load import create_daily_crashes_table
+
+    create_daily_crashes_table()
+
     crashes_df = select_from_silver_crashes(year=year, state_code=state_code)
 
     daily_df = agregate_to_daily(crashes_df)

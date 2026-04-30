@@ -40,7 +40,9 @@ def run_all_crashes_to_silver(
     total_tasks = total_states * total_years
     current_task = 0
 
-    print(f"Starting full ETL pipeline: {total_states} states x {total_years} years = {total_tasks} tasks")
+    print(
+        f"Starting full ETL pipeline: {total_states} states x {total_years} years = {total_tasks} tasks"
+    )
 
     for loc in locations:
         state_code = loc["code"]
@@ -48,7 +50,9 @@ def run_all_crashes_to_silver(
 
         for year in range(start_year, end_year + 1):
             current_task += 1
-            print(f"[{current_task}/{total_tasks}] Processing {state_name} ({state_code}), year {year}...")
+            print(
+                f"[{current_task}/{total_tasks}] Processing {state_name} ({state_code}), year {year}..."
+            )
 
             try:
                 # Step 1: Extract to Bronze
