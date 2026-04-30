@@ -83,3 +83,46 @@ def log_metrics(metrics: dict[str, Any], prefix: str = "") -> None:
     for key, value in metrics.items():
         metric_name = f"{prefix}.{key}" if prefix else key
         logger.info(f"📊 Metric - {metric_name}: {value}")
+
+
+def check_data_exists(
+    schema_name: str,
+    table_name: str,
+    year: int,
+    state_code: int | None = None,
+    location_name: str | None = None,
+) -> bool:
+    """
+    Check if data already exists in database for given parameters.
+
+    Args:
+        schema_name: Database schema
+        table_name: Table name
+        year: Year to check
+        state_code: State code (for crash data)
+        location_name: Location name (for weather data)
+
+    Returns:
+        True if data exists, False otherwise
+    """
+    from config.database import db_manager
+    from sqlalchemy import text
+
+    query = text(
+        f"SELECT COUNT(*) FROM {schema_name}.{table_name} WHERE year = :year"
+    )
+    params = {"year": year}
+
+    if state_code is not None:
+        query = text(f"{query.text} AND state_code = :state_code")
+        params["state_code"] = state_code
+
+    if location_name is not None:
+        query = text(f"{query.text} AND location_name = :location_name")
+        params["location_name"] = location_name
+
+    with db_manager.get_connection() as connection:
+        result = connection.execute(query, params)
+        count = result.scalar()
+
+    return count > 0

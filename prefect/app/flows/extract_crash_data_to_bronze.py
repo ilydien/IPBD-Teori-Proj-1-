@@ -1,5 +1,9 @@
 """Flow for extracting crashes from API to Bronze layer."""
 
+import sys
+from pathlib import Path
+sys.path.insert(0, "/prefect")
+
 from prefect import flow
 from tasks.crashes.extract_from_api.extract import fetch_crash_incidents
 from tasks.crashes.extract_from_api.transform import unwrap_api_response
@@ -7,6 +11,18 @@ from tasks.crashes.extract_from_api.load import insert_raw_to_database
 
 
 def execute_tasks(state_code: int, year: int, format_data: str = "json") -> int:
+    # Check if data already exists in bronze layer
+    from utils.helpers import check_data_exists
+
+    if check_data_exists(
+        schema_name="bronze",
+        table_name="fars_crashes",
+        year=year,
+        state_code=state_code,
+    ):
+        print(f"⏭️  Skipping: Data already exists for state {state_code}, year {year}")
+        return 0
+
     api_response = fetch_crash_incidents(
         stateCode=state_code,
         year=year,

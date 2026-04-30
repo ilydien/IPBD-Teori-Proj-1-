@@ -40,7 +40,20 @@ def extract_weather_to_silver(
 
     all_records = []
     for i, (start_date, end_date) in enumerate(year_batches):
+        year = int(start_date[:4])
         for j, loc in enumerate(locations):
+            # Check if data already exists in silver layer
+            from utils.helpers import check_data_exists
+
+            if check_data_exists(
+                schema_name="silver",
+                table_name="daily_weather",
+                year=year,
+                location_name=loc["name"],
+            ):
+                print(f"⏭️  Skipping: Data already exists for {loc['name']}, year {year}")
+                continue
+
             records = fetch_weather_from_api(loc, start_date, end_date)
             all_records.extend(records)
             # Add delay between calls to avoid rate limiting (skip after last call)
