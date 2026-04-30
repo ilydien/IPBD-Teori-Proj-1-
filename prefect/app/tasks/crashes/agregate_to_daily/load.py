@@ -29,8 +29,10 @@ def create_daily_crashes_table() -> str:
     table_name = "daily_crashes"
     schema_name = "silver"
 
+    # Step 1: Create Silver schema if not exists
     create_schema_sql = text("CREATE SCHEMA IF NOT EXISTS silver")
 
+    # Step 2: Create daily_crashes table with unique constraint
     create_table_sql = text(f"""
         CREATE TABLE IF NOT EXISTS {schema_name}.{table_name} (
             id SERIAL PRIMARY KEY,
@@ -44,6 +46,7 @@ def create_daily_crashes_table() -> str:
         )
     """)
 
+    # Step 3: Execute DDL statements
     with db_manager.get_connection() as connection:
         connection.execute(create_schema_sql)
         connection.execute(create_table_sql)
@@ -74,11 +77,13 @@ async def upsert_to_daily_crashes(daily_data: pd.DataFrame) -> int:
     table_name = "daily_crashes"
     schema_name = "silver"
 
+    # Step1: Define columns for INSERT
     columns = ["year", "month", "day", "state_name", "total_crashes"]
     columns_sql = ", ".join(columns)
     placeholders = ", ".join([f":{col}" for col in columns])
     updates = "total_crashes = EXCLUDED.total_crashes"
 
+    # Step2: Build upsert SQL query
     upsert_sql = text(f"""
         INSERT INTO {schema_name}.{table_name} ({columns_sql})
         VALUES ({placeholders})
@@ -86,10 +91,13 @@ async def upsert_to_daily_crashes(daily_data: pd.DataFrame) -> int:
         {updates}
     """)
 
+    # Step3: Convert DataFrame to records
     records = daily_data.fillna(value=None).replace({pd.NA: None}).to_dict(orient="records")
 
+    # Step4: Execute upsert
     with db_manager.get_connection() as connection:
         connection.execute(upsert_sql, records)
 
+    # Step5: Log result and return count
     print(f"Upserted {len(daily_data)} records to silver.{table_name}")
     return len(daily_data)

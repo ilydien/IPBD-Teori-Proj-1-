@@ -22,15 +22,16 @@ def run_all_crashes_to_silver(
 ) -> dict:
     """
     Run complete crash ETL pipeline for all states: API -> Bronze -> Silver -> Daily.
-
+    
     Args:
         start_year: Start year (default: 2012)
         end_year: End year (default: 2015)
         format_data: API response format (default: json)
-
+    
     Returns:
         Dict with step results: bronze_inserted, silver_upserted, daily_upserted, failed
     """
+    # Step 1: Initialize counters
     total_bronze = 0
     total_silver = 0
     total_daily = 0
@@ -44,6 +45,7 @@ def run_all_crashes_to_silver(
         f"Starting full ETL pipeline: {total_states} states x {total_years} years = {total_tasks} tasks"
     )
 
+    # Step 2: Loop through all states and years
     for loc in locations:
         state_code = loc["code"]
         state_name = loc["name"]
@@ -55,7 +57,7 @@ def run_all_crashes_to_silver(
             )
 
             try:
-                # Step 1: Extract to Bronze
+                # Step 3: Extract crash data to Bronze layer
                 bronze_count = extract_crash_data_to_bronze(
                     state_code=state_code,
                     year=year,
@@ -63,14 +65,14 @@ def run_all_crashes_to_silver(
                 )
                 total_bronze += bronze_count
 
-                # Step 2: Transform to Silver (no check, allow updates)
+                # Step 4: Transform Bronze data to Silver layer
                 silver_count = transform_crashes_to_silver(
                     state_code=state_code,
                     year=year,
                 )
                 total_silver += silver_count
 
-                # Step 3: Aggregate to Daily
+                # Step 5: Aggregate Silver data to Daily level
                 daily_count = agregate_crashes_to_daily(
                     state_code=state_code,
                     year=year,
@@ -85,6 +87,7 @@ def run_all_crashes_to_silver(
             if not (state_code == locations[-1]["code"] and year == end_year):
                 time.sleep(2)
 
+    # Step 6: Return summary of all ETL operations
     return {
         "bronze_inserted": total_bronze,
         "silver_upserted": total_silver,

@@ -40,6 +40,7 @@ def aggregate_weather_to_daily(
     Returns:
         Aggregated DataFrame
     """
+    # Step1: Return empty DataFrame if input is empty
     if weather_df.empty:
         print("No data to aggregate")
         return pd.DataFrame(
@@ -54,12 +55,14 @@ def aggregate_weather_to_daily(
                 "record_count",
             ]
         )
-
+    
+    # Step2: Validate required columns exist
     required_cols = ["location_name", "year", "month", "day"]
     for col in required_cols:
         if col not in weather_df.columns:
             raise ValueError(f"Missing required column: {col}")
-
+    
+    # Step3: Group by location and date, aggregate metrics
     aggregated = (
         weather_df.groupby(["location_name", "year", "month", "day"])
         .agg(
@@ -70,7 +73,8 @@ def aggregate_weather_to_daily(
         )
         .reset_index()
     )
-
+    
+    # Step4: Return aggregated DataFrame
     print(
         f"Aggregated {len(weather_df)} records to {len(aggregated)} daily weather records"
     )
@@ -102,6 +106,7 @@ def query_daily_weather_summary(
     Returns:
         Aggregated DataFrame
     """
+    # Step1: Build SELECT query with aggregation
     query = text(f"""
         SELECT
             location_name,
@@ -117,6 +122,7 @@ def query_daily_weather_summary(
 
     params = {}
     conditions = []
+    # Step2: Add WHERE conditions if filters exist
     if year is not None:
         conditions.append("year = :year")
         params["year"] = year
@@ -127,13 +133,16 @@ def query_daily_weather_summary(
     if conditions:
         query = text(f"{query} WHERE " + " AND ".join(conditions))
 
+    # Step3: Add GROUP BY and ORDER BY clauses
     query = text(f"{query} GROUP BY location_name, year, month, day ORDER BY year, month, day")
 
+    # Step4: Execute query and fetch results
     with db_manager.get_connection() as connection:
         result = connection.execute(query, params)
         rows = result.fetchall()
         columns = result.keys()
 
+    # Step5: Convert results to DataFrame
     df = pd.DataFrame(rows, columns=columns)
     print(f"Queried {len(df)} aggregated daily weather records")
     return df

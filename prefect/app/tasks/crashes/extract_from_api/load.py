@@ -26,11 +26,14 @@ def insert_raw_to_database(
     Hybrid approach: Try Prefect Block first, fallback to .env.
     """
     dtype = {"results": JSONB}
+    
+    # Step 1: Try Prefect Block first, fallback to .env
     try:
         from prefect_sqlalchemy import SqlAlchemyConnector
 
         database_block = SqlAlchemyConnector.load(settings.PREFECT_BLOCK_NAME)
 
+        # Step 2: Insert each row using Prefect block connection
         with database_block.get_connection(begin=True) as connection:
             for idx, row in tabular_data.iterrows():
                 upsert_sql = text(
@@ -74,6 +77,7 @@ def insert_raw_to_database(
         if not settings.validate_db_settings():
             raise ValueError("Neither Prefect block nor .env configuration found")
 
+        # Step 3: Fallback to .env configuration
         with db_manager.get_connection() as connection:
             for idx, row in tabular_data.iterrows():
                 upsert_sql = text(
@@ -106,6 +110,7 @@ def insert_raw_to_database(
                 )
         print("Used .env configuration (local mode)")
 
+    # Step 4: Log total count and return number of inserted rows
     total_count = db_manager.get_table_count(schema_name, table_name)
     print(f"Total rows in table: {total_count}")
 

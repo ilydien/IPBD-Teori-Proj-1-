@@ -28,17 +28,18 @@ def select_from_silver_crashes(
 ) -> pd.DataFrame:
     """
     Read flattened crash data from Silver layer.
-
+    
     Args:
         schema_name: Schema name (default: silver)
         table_name: Table name (default: parsed_crashes_array)
         start_year: Filter by year (optional)
         end_year: Filter by year (optional)
         state_code: Filter by state (optional)
-
+    
     Returns:
         DataFrame with flattened crash columns
     """
+    # Step 1: Build SELECT query for Silver table
     query = text(f"SELECT * FROM {schema_name}.{table_name}")
     params = {}
 
@@ -54,14 +55,17 @@ def select_from_silver_crashes(
             conditions.append("state_code = :state_code")
             params["state_code"] = state_code
 
+    # Step 2: Add WHERE conditions if filters exist
     if conditions:
         query = text(f"{query} WHERE " + " AND ".join(conditions))
 
+    # Step 3: Execute query and fetch results
     with db_manager.get_connection() as connection:
         result = connection.execute(query, params)
         rows = result.fetchall()
         columns = result.keys()
 
+    # Step 4: Convert results to DataFrame
     df = pd.DataFrame(rows, columns=columns)
     print(f"Loaded {len(df)} rows from silver.{table_name}")
     return df

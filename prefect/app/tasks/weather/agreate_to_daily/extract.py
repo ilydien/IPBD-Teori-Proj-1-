@@ -30,16 +30,17 @@ def select_from_silver_weather(
 ) -> pd.DataFrame:
     """
     Read weather data from Silver layer.
-
+    
     Args:
         schema_name: Schema name (default: silver)
         table_name: Table name (default: daily_weather)
         year: Filter by year (optional)
         location_name: Filter by location name (optional)
-
+    
     Returns:
         DataFrame with weather data
     """
+    # Step1: Build SELECT query for Silver table
     query = text(f"SELECT * FROM {schema_name}.{table_name}")
     params = {}
 
@@ -51,14 +52,17 @@ def select_from_silver_weather(
         conditions.append("location_name = :location_name")
         params["location_name"] = location_name
 
+    # Step2: Add WHERE conditions if filters exist
     if conditions:
         query = text(f"{query} WHERE " + " AND ".join(conditions))
 
+    # Step3: Execute query and fetch results
     with db_manager.get_connection() as connection:
         result = connection.execute(query, params)
         rows = result.fetchall()
         columns = result.keys()
 
+    # Step4: Convert results to DataFrame
     df = pd.DataFrame(rows, columns=columns)
     print(f"Loaded {len(df)} rows from {schema_name}.{table_name}")
     return df

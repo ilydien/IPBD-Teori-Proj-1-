@@ -35,8 +35,10 @@ def create_gold_table() -> str:
     table_name = "daily_crashes_weather"
     schema_name = "gold"
 
+    # Step 1: Create Gold schema if not exists
     create_schema_sql = text("CREATE SCHEMA IF NOT EXISTS gold")
 
+    # Step 2: Create Gold table with joined crash and weather data
     create_table_sql = text(f"""
         CREATE TABLE IF NOT EXISTS {schema_name}.{table_name} (
             id SERIAL PRIMARY KEY,
@@ -56,11 +58,13 @@ def create_gold_table() -> str:
         )
     """)
 
+    # Step 3: Create index for performance
     create_index_sql = text(f"""
         CREATE INDEX IF NOT EXISTS idx_gold_daily_crashes_weather_date_state
             ON {schema_name}.{table_name} (year, month, day, state)
     """)
 
+    # Step 4: Execute all DDL statements
     with db_manager.get_connection() as connection:
         connection.execute(create_schema_sql)
         connection.execute(create_table_sql)
@@ -83,11 +87,11 @@ def populate_gold_table(
 ) -> int:
     """
     Populate Gold table by joining Silver crash and weather data.
-
+    
     Args:
         year: Filter by year (optional)
         state_name: Filter by state (optional)
-
+    
     Returns:
         Number of records upserted
     """
@@ -97,6 +101,7 @@ def populate_gold_table(
     conditions = []
     params = {}
 
+    # Step 1: Build WHERE conditions if filters exist
     if year is not None:
         conditions.append("dw.year = :year")
         params["year"] = year
@@ -109,6 +114,7 @@ def populate_gold_table(
     if conditions:
         where_clause = "WHERE " + " AND ".join(conditions)
 
+    # Step 2: Build upsert SQL with JOIN between weather and crash data
     upsert_sql = text(f"""
         INSERT INTO {schema_name}.{table_name}
             (day, month, year, state, longitude, latitude,
@@ -138,10 +144,12 @@ def populate_gold_table(
             created_at = CURRENT_TIMESTAMP
     """)
 
+    # Step 3: Execute upsert
     with db_manager.get_connection() as connection:
         result = connection.execute(upsert_sql, params)
         count = result.rowcount
 
+    # Step 4: Log result and return count
     print(f"Upserted {count} records to {schema_name}.{table_name}")
     return count
 
@@ -168,10 +176,12 @@ def get_gold_count(
     table_name = "daily_crashes_weather"
     schema_name = "gold"
 
+    # Step 1: Build SELECT COUNT query
     query = text(f"SELECT COUNT(*) FROM {schema_name}.{table_name}")
     params = {}
 
     conditions = []
+    # Step 2: Add WHERE conditions if filters exist
     if year is not None:
         conditions.append("year = :year")
         params["year"] = year
@@ -183,9 +193,11 @@ def get_gold_count(
     if conditions:
         query = text(f"{query.text} WHERE " + " AND ".join(conditions))
 
+    # Step 3: Execute query and get count
     with db_manager.get_connection() as connection:
         result = connection.execute(query, params)
         count = result.scalar()
 
+    # Step 4: Log result and return count
     print(f"Gold table has {count} records")
     return count

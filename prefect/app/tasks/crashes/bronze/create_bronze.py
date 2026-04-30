@@ -33,8 +33,10 @@ def create_bronze_table() -> str:
     table_name = "fars_crashes"
     schema_name = "bronze"
 
+    # Step 1: Create Bronze schema if not exists
     create_schema_sql = text("CREATE SCHEMA IF NOT EXISTS bronze")
 
+    # Step 2: Create Bronze table with JSONB column for raw data
     create_table_sql = text(f"""
         CREATE TABLE IF NOT EXISTS {schema_name}.{table_name} (
             id SERIAL PRIMARY KEY,
@@ -49,11 +51,13 @@ def create_bronze_table() -> str:
         )
     """)
 
+    # Step 3: Create index for performance
     create_index_sql = text(f"""
         CREATE INDEX IF NOT EXISTS idx_bronze_fars_crashes_state_year
             ON {schema_name}.{table_name} (state_code, year)
     """)
 
+    # Step 4: Execute all DDL statements
     with db_manager.get_connection() as connection:
         connection.execute(create_schema_sql)
         connection.execute(create_table_sql)

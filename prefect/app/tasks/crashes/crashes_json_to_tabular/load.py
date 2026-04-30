@@ -90,7 +90,7 @@ def get_columns_sql(df: pd.DataFrame) -> str:
 def create_silver_parsed_crashes_table() -> str:
     """
     Create silver.parsed_crashes_array table if not exists.
-
+    
     Args:
         (None)
     Returns:
@@ -99,8 +99,10 @@ def create_silver_parsed_crashes_table() -> str:
     table_name = "parsed_crashes_array"
     schema_name = "silver"
 
+    # Step 1: Create Silver schema if not exists
     create_schema_sql = text("CREATE SCHEMA IF NOT EXISTS silver")
 
+    # Step 2: Create Silver table with all crash fields
     create_table_sql = text(f"""
         CREATE TABLE IF NOT EXISTS {schema_name}.{table_name} (
             id SERIAL PRIMARY KEY,
@@ -201,6 +203,7 @@ def create_silver_parsed_crashes_table() -> str:
         )
     """)
 
+    # Step 3: Create indexes for performance
     create_index_sql = text(f"""
         CREATE INDEX IF NOT EXISTS idx_silver_parsed_crashes_state_year
             ON {schema_name}.{table_name} (state_code, caseyear);
@@ -208,6 +211,7 @@ def create_silver_parsed_crashes_table() -> str:
             ON {schema_name}.{table_name} (year, month, day);
     """)
 
+    # Step 4: Execute all DDL statements
     with db_manager.get_connection() as connection:
         connection.execute(create_schema_sql)
         connection.execute(create_table_sql)
@@ -348,6 +352,7 @@ def upsert_to_silver(tabular_data: pd.DataFrame) -> int:
     table_name = "parsed_crashes_array"
     schema_name = "silver"
 
+    # Step 1: Define column mapping and valid columns
     column_mapping = {
         "state": "state_code",
         "statename": "state_name",
@@ -447,10 +452,12 @@ def upsert_to_silver(tabular_data: pd.DataFrame) -> int:
         "dayname",
     }
 
+    # Step 2: Rename columns if needed
     for old_col, new_col in column_mapping.items():
         if old_col in tabular_data.columns and new_col not in tabular_data.columns:
             tabular_data.rename(columns={old_col: new_col}, inplace=True)
 
+    # Step 3: Filter to valid columns only
     columns = [col for col in tabular_data.columns if col in valid_columns]
 
     columns_sql = ", ".join(columns)
@@ -465,6 +472,7 @@ def upsert_to_silver(tabular_data: pd.DataFrame) -> int:
 
     tabular_data = tabular_data[columns]
 
+    # Step 4: Build upsert SQL query
     upsert_sql = text(f"""
         INSERT INTO {schema_name}.{table_name} ({columns_sql})
         VALUES ({placeholders})
@@ -472,6 +480,7 @@ def upsert_to_silver(tabular_data: pd.DataFrame) -> int:
         {updates}
     """)
 
+    # Step 5: Convert DataFrame to records and execute upsert
     records = (
         tabular_data.fillna(value=None).replace({pd.NA: None}).to_dict(orient="records")
     )
@@ -479,5 +488,6 @@ def upsert_to_silver(tabular_data: pd.DataFrame) -> int:
     with db_manager.get_connection() as connection:
         connection.execute(upsert_sql, records)
 
+    # Step 6: Log result and return count
     print(f"Upserted {len(tabular_data)} records to silver.{table_name}")
     return len(tabular_data)

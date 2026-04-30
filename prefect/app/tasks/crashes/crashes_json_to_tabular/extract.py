@@ -28,16 +28,17 @@ def select_from_bronze_crashes(
 ) -> pd.DataFrame:
     """
     Read crash JSON data from Bronze layer.
-
+    
     Args:
         schema_name: Schema name (default: bronze)
         table_name: Table name (default: fars_crashes)
         year: Filter by year
         state_code: Filter by state_code(s)
-
+    
     Returns:
         DataFrame with columns:  year, state_code, state_name, count, message, results
     """
+    # Step 1: Build SELECT query for Bronze table
     query = text(
         f"SELECT year, state_code, state_name, count, message, results FROM {schema_name}.{table_name}"
     )
@@ -55,13 +56,16 @@ def select_from_bronze_crashes(
             conditions.append("state_code = :state_code")
             params["state_code"] = state_code
 
+    # Step 2: Add WHERE conditions if filters exist
     if conditions:
         query = text(f"{query} WHERE " + " AND ".join(conditions))
 
+    # Step 3: Execute query and fetch results
     with db_manager.get_connection() as connection:
         result = connection.execute(query, params)
         rows = result.fetchall()
 
+    # Step 4: Convert results to DataFrame
     df = pd.DataFrame(
         rows,
         columns=[

@@ -16,23 +16,25 @@ from prefect import task
 def flatten_crashes_json(bronze_df: pd.DataFrame) -> pd.DataFrame:
     """
     Flatten crash JSON array to tabular format for Silver layer.
-
+    
     Takes bronze.fars_crashes data with 'results' JSONB column and flattens
     each crash record into individual columns.
-
+    
     Args:
         bronze_df: DataFrame from bronze with columns: year, state_code, state_name, count, message, results
-
+    
     Returns:
         DataFrame with all crash fields flattened (one row per crash record)
     """
     all_crashes = []
 
+    # Step 1: Iterate through each row in Bronze DataFrame
     for _, row in bronze_df.iterrows():
         year = row["year"]
         state_code = row["state_code"]
         state_name = row["state_name"]
 
+        # Step 2: Parse JSON results from Bronze layer
         results_json = row["results"]
         if results_json is None:
             crashes = []
@@ -43,6 +45,7 @@ def flatten_crashes_json(bronze_df: pd.DataFrame) -> pd.DataFrame:
         else:
             crashes = []
 
+        # Step 3: Flatten each crash record to tabular format
         for crash in crashes:
             flattened = {}
             for key, value in crash.items():
@@ -65,6 +68,7 @@ def flatten_crashes_json(bronze_df: pd.DataFrame) -> pd.DataFrame:
 
             all_crashes.append(flattened)
 
+    # Step 4: Convert to DataFrame and return
     df = pd.DataFrame(all_crashes)
     print(f"Flattened {len(df)} crash records")
     return df

@@ -13,20 +13,21 @@ def run_crash_etl(
 ) -> dict:
     """
     Run complete crash ETL pipeline: API → Bronze → Silver → Daily.
-
+    
     Step 1: Fetch from FARS API and load to Bronze layer
     Step 2: Transform Bronze data to Silver layer
     Step 3: Aggregate to daily level
-
+    
     Args:
         stateCode: FARS state code (1-56)
         startYear: Start year
         endYear: End year
         formatData: API response format
-
+    
     Returns:
         Dict with step results
     """
+    # Step 1: Extract crash data from API to Bronze layer
     step1_count = extract_crash_data_to_bronze(
         stateCode=stateCode,
         startYear=startYear,
@@ -34,12 +35,14 @@ def run_crash_etl(
         formatData=formatData,
     )
 
+    # Step 2: Transform Bronze data to Silver layer
     step2_count = transform_crashes_to_silver(
         start_year=startYear,
         end_year=endYear,
         state_code=stateCode,
     )
 
+    # Step 3: Aggregate Silver data to daily level
     step3_count = agregate_crashes_to_daily(
         start_year=startYear,
         end_year=endYear,

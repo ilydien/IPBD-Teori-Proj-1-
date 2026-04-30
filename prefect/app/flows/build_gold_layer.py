@@ -18,28 +18,28 @@ def build_gold_layer(
 ) -> dict:
     """
     Build Gold layer by joining Silver crash and weather data.
-
+    
     Args:
         year: Filter by year (optional)
         state_name: Filter by state (optional)
-
+    
     Returns:
         Dict with result summary
     """
-    # Step1: Create Gold tables
+    # Step 1: Create Gold tables (daily_crashes_weather & weather_crash_correlation)
     create_gold_table()
     create_correlation_table()
 
-    # Step2: Populate Gold table
+    # Step 2: Populate Gold table by joining Silver crash and weather data
     upserted = populate_gold_table(
         year=year,
         state_name=state_name,
     )
 
-    # Step3: Calculate weather-crash correlation
+    # Step 3: Calculate weather-crash correlation
     correlation_count = calculate_weather_crash_correlation()
 
-    # Step4: Get total count
+    # Step 4: Get total count from Gold table
     total_count = get_gold_count()
 
     return {

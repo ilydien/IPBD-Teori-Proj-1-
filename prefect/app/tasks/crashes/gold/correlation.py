@@ -33,8 +33,10 @@ def create_correlation_table() -> str:
     table_name = "weather_crash_correlation"
     schema_name = "gold"
 
+    # Step 1: Create Gold schema if not exists
     create_schema_sql = text("CREATE SCHEMA IF NOT EXISTS gold")
 
+    # Step 2: Create correlation table with weather categories
     create_table_sql = text(f"""
         CREATE TABLE IF NOT EXISTS {schema_name}.{table_name} (
             id SERIAL PRIMARY KEY,
@@ -50,11 +52,13 @@ def create_correlation_table() -> str:
         )
     """)
 
+    # Step 3: Create index for performance
     create_index_sql = text(f"""
         CREATE INDEX IF NOT EXISTS idx_gold_correlation_weather
             ON {schema_name}.{table_name} (weather_name)
     """)
 
+    # Step 4: Execute all DDL statements
     with db_manager.get_connection() as connection:
         connection.execute(create_schema_sql)
         connection.execute(create_table_sql)

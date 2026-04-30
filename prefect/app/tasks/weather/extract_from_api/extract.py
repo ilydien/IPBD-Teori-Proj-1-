@@ -30,15 +30,16 @@ def fetch_weather_from_api(
 ) -> list[dict[str, Any]]:
     """
     Fetch weather data from Open-Meteo API for a location.
-
+    
     Args:
         loc: Location dict with 'name', 'lat', 'lon'
         start_date: Start date (YYYY-MM-DD)
         end_date: End date (YYYY-MM-DD)
-
+    
     Returns:
         List of weather records
     """
+    # Step 1: Prepare API request parameters
     url = "https://archive-api.open-meteo.com/v1/archive"
 
     params = {
@@ -52,10 +53,12 @@ def fetch_weather_from_api(
 
     print(f"Fetching weather data for {loc['name']} ({start_date} to {end_date})...")
 
+    # Step 2: GET request to Open-Meteo API
     response = requests.get(url, params=params, timeout=settings.API_TIMEOUT)
     response.raise_for_status()
     data = response.json()
 
+    # Step 3: Parse daily weather data
     records = []
     daily = data.get("daily", {})
     for i in range(len(daily.get("time", []))):
@@ -71,5 +74,6 @@ def fetch_weather_from_api(
             }
         )
 
+    # Step 4: Return fetched records
     print(f"Fetched {len(records)} records for {loc['name']}")
     return records

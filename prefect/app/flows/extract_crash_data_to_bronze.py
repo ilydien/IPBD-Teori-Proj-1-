@@ -12,6 +12,11 @@ from tasks.crashes.extract_from_api.load import insert_raw_to_database
 
 
 def execute_tasks(state_code: int, year: int, format_data: str = "json") -> int:
+    # Step 1: Ensure Bronze table exists
+    from tasks.crashes.bronze.create_bronze import create_bronze_table
+    create_bronze_table()
+
+    # Step 2: Check if data already exists in bronze layer
     from utils.helpers import check_data_exists
 
     if check_data_exists(
@@ -23,12 +28,14 @@ def execute_tasks(state_code: int, year: int, format_data: str = "json") -> int:
         print(f"⏭️  Skipping: Data already exists for state {state_code}, year {year}")
         return 0
 
+    # Step 3: Fetch crash data from FARS API
     api_response = fetch_crash_incidents(
         stateCode=state_code,
         year=year,
         formatData=format_data,
     )
 
+    # Step 4: Unwrap API response to tabular format
     params = {
         "year": year,
         "state": state_code,
@@ -39,6 +46,7 @@ def execute_tasks(state_code: int, year: int, format_data: str = "json") -> int:
         params=params,
     )
 
+    # Step 5: Insert tabular data to Bronze layer
     inserted_count = insert_raw_to_database(
         tabular_data=tabular_data,
         schema_name="bronze",

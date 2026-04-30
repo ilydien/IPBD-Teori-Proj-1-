@@ -11,13 +11,23 @@ def execute_tasks(
     state_code: int | None = None,
     year: int | None = None,
 ) -> int:
+    # Step 1: Ensure Silver table exists
+    from tasks.crashes.crashes_json_to_tabular.load import (
+        create_silver_parsed_crashes_table,
+    )
+
+    create_silver_parsed_crashes_table()
+
+    # Step 2: Select crash data from Bronze layer
     bronze_df = select_from_bronze_crashes(
         year=year,
         state_code=state_code,
     )
 
+    # Step 3: Flatten JSON data to tabular format
     flattened_df = flatten_crashes_json(bronze_df)
 
+    # Step 4: Upsert flattened data to Silver layer
     upserted_count = upsert_to_silver(flattened_df)
     return upserted_count
 

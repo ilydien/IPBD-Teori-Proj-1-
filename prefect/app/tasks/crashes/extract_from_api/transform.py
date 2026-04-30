@@ -13,7 +13,10 @@ def unwrap_api_response(
     api_response: dict[str, Any], params: dict[str, Any]
 ) -> pd.DataFrame:
     """Extract and flatten API response for Bronze layer."""
+    # Step 1: Extract Results array from API response
     results_array = api_response.get("Results", [[]])[0]
+    
+    # Step 2: Build tabular data from API response and params
     return pd.DataFrame.from_dict(
         {
             "year": [params["year"]],

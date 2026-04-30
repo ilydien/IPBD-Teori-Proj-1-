@@ -35,8 +35,10 @@ def create_weather_table(
     Returns:
         Table name
     """
+    # Step 1: Create Silver schema if not exists
     create_schema_sql = text("CREATE SCHEMA IF NOT EXISTS silver")
 
+    # Step 2: Create daily_weather table with unique constraint
     create_table_sql = text(f"""
         CREATE TABLE IF NOT EXISTS {schema_name}.{table_name} (
             id SERIAL PRIMARY KEY,
@@ -55,6 +57,7 @@ def create_weather_table(
         )
     """)
 
+    # Step 3: Execute DDL statements
     with db_manager.get_connection() as connection:
         connection.execute(create_schema_sql)
         connection.execute(create_table_sql)
@@ -86,10 +89,12 @@ def insert_weather_to_silver(
     Returns:
         Number of records inserted
     """
+    # Step 1: Return if no records
     if not records:
         print("No records to insert")
         return 0
 
+    # Step 2: Convert records to DataFrame
     df = pd.DataFrame(records)
 
     # Parse date to extract year, month, day in Python
@@ -99,10 +104,11 @@ def insert_weather_to_silver(
     df['day'] = df['date'].dt.day
     df['date'] = df['date'].dt.strftime('%Y-%m-%d')
 
+    # Step 3: Build upsert SQL query
     insert_sql = text(f"""
         INSERT INTO {schema_name}.{table_name}
-        (location_name, latitude, longitude, date, year, month, day,
-         temperature_2m_max, temperature_2m_min, precipitation_sum)
+            (location_name, latitude, longitude, date, year, month, day,
+             temperature_2m_max, temperature_2m_min, precipitation_sum)
         VALUES (
             :location_name, :latitude, :longitude, :date,
             :year,
@@ -120,11 +126,14 @@ def insert_weather_to_silver(
             created_at = CURRENT_TIMESTAMP
     """)
 
+    # Step 4: Convert to records format
     records_dict = df.to_dict(orient="records")
 
+    # Step 5: Execute upsert for each record
     with db_manager.get_connection() as connection:
         for r in records_dict:
             connection.execute(insert_sql, r)
 
+    # Step 6: Log result and return count
     print(f"Inserted {len(records_dict)} records to {schema_name}.{table_name}")
     return len(records_dict)
