@@ -11,8 +11,6 @@ from tasks.weather.extract_from_api.extract import fetch_weather_from_api
 from tasks.weather.extract_from_api.load import insert_weather_to_silver, create_weather_table
 from utils.locations import locations
 
-# TEMPORARY TEST: hanya 1 lokasi, 1 tahun
-# locations = [locations[0]]  # Uncomment to use only Alabama
 start_year_test = 2012
 end_year_test = 2015
 

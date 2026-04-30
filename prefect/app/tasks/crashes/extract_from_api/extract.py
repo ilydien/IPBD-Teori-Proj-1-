@@ -10,7 +10,6 @@ from prefect import task
 from prefect.tasks import task_input_hash
 
 from settings import settings
-# from config.api import APIClient
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -33,14 +32,15 @@ def fetch_crash_incidents(
     stateCode: int, year: int, formatData: str = "json"
 ) -> list[dict[str, Any]]:
     """
-    Fetch posts from a REST API endpoint.
+    Fetch crash data from FARS API.
 
     Args:
-        api_url: Optional custom API URL (defaults to settings.API_BASE_URL)
-        limit: Maximum number of posts to fetch
+        stateCode: FARS state code (1-56)
+        year: Year to fetch data for
+        formatData: Response format (default: json)
 
     Returns:
-        List of post dictionaries
+        List of crash records from FARS API
     """
     url = "https://crashviewer.nhtsa.dot.gov/crashviewer/CrashAPI/FARSData/GetFARSData"
     params = {
@@ -71,22 +71,3 @@ def fetch_crash_incidents(
         f"Successfully fetched crashes in state code {stateCode} in year {year}, total {len(raw_json.get('Results', [[]])[0])} crashes."
     )
     return raw_json
-
-
-# @task(
-#     name="fetch_posts_with_client",
-#     retries=settings.API_MAX_RETRIES,
-#     retry_delay_seconds=settings.API_RETRY_DELAYS,
-#     log_prints=True,
-#     tags=["extract", "api"],
-# )
-# def fetch_posts_with_client(limit: int = 10) -> list[dict[str, Any]]:
-#     """
-#     Alternative extraction using the APIClient class.
-#     Better for complex API interactions.
-#     """
-#     with APIClient() as client:
-#         posts = client.get("/posts", params={"_limit": limit})
-#
-#     print(f"Successfully fetched {len(posts)} posts")
-#     return posts

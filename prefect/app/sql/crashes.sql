@@ -3,7 +3,9 @@
 -- ============================================================
 
 CREATE SCHEMA IF NOT EXISTS bronze;
+DROP SCHEMA  bronze;
 
+SE
 DROP TABLE IF EXISTS bronze.fars_crashes
 CREATE TABLE IF NOT EXISTS bronze.fars_crashes (
     id SERIAL PRIMARY KEY,
@@ -26,7 +28,7 @@ CREATE INDEX IF NOT EXISTS idx_bronze_fars_crashes_state_year
 
 CREATE SCHEMA IF NOT EXISTS silver;
 
-DROP TABLE IF EXISTS silver.parsed_crashes_array;
+-- Table: Crash Case
 CREATE TABLE IF NOT EXISTS silver.parsed_crashes_array (
     id SERIAL PRIMARY KEY,
     st_case INTEGER,
@@ -144,7 +146,3 @@ CREATE TABLE IF NOT EXISTS silver.daily_crashes (
 
 CREATE INDEX IF NOT EXISTS idx_silver_daily_crashes_date_state
     ON silver.daily_crashes (year, month, day, state_name);
-
--- ============================================================
--- GOLD LAYER (Business-Level Aggregations)
--- ============================================================

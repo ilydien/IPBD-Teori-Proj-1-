@@ -143,7 +143,9 @@ def calculate_weather_crash_correlation() -> int:
     # Print summary for quick insight
     print("\n=== Weather-Crash Correlation Summary ===")
     for _, row in df.iterrows():
-        print(f"{row['weather_name']}: {row['avg_crashes_per_day']} crashes/day ({row['total_crashes']} total crashes in {row['total_days']} days)")
+        print(
+            f"{row['weather_name']}: {row['avg_crashes_per_day']} crashes/day ({row['total_crashes']} total crashes in {row['total_days']} days)"
+        )
 
     return len(records)
 
@@ -157,6 +159,8 @@ def get_correlation_summary() -> pd.DataFrame:
     """
     Get the weather-crash correlation summary from Gold table.
 
+    Args:
+        (None)
     Returns:
         DataFrame with correlation data
     """

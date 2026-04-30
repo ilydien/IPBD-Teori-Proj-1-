@@ -1,5 +1,6 @@
--- Silver Schema for Medallion Architecture
--- Weather data from Open-Meteo API (cleaned/processed)
+-- ============================================================
+-- SILVER LAYER (Cleaned/Deduplicated Data)
+-- ============================================================
 
 CREATE SCHEMA IF NOT EXISTS silver;
 

@@ -25,6 +25,8 @@ def create_bronze_table() -> str:
     Create bronze.fars_crashes table if not exists.
     Includes schema creation.
 
+    Args:
+        (None)
     Returns:
         Table name
     """

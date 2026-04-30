@@ -27,6 +27,8 @@ def create_gold_table() -> str:
     """
     Create gold.daily_crashes_weather table if not exists.
 
+    Args:
+        (None)
     Returns:
         Table name
     """

@@ -4,6 +4,7 @@
 
 CREATE SCHEMA IF NOT EXISTS gold;
 
+-- Table: Daily Crashes and Weather
 CREATE TABLE IF NOT EXISTS gold.daily_crashes_weather (
     id SERIAL PRIMARY KEY,
     day INTEGER NOT NULL,
