@@ -5,13 +5,18 @@ from prefect import flow
 from tasks.crashes.crashes_json_to_tabular.extract import select_from_bronze_crashes
 from tasks.crashes.crashes_json_to_tabular.transform import flatten_crashes_json
 from tasks.crashes.crashes_json_to_tabular.load import upsert_to_silver
-from config.database import db_manager
 
 
 def execute_tasks(
     state_code: int | None = None,
     year: int | None = None,
 ) -> int:
+    from tasks.crashes.crashes_json_to_tabular.load import (
+        create_silver_parsed_crashes_table,
+    )
+
+    create_silver_parsed_crashes_table()
+
     bronze_df = select_from_bronze_crashes(
         year=year,
         state_code=state_code,
