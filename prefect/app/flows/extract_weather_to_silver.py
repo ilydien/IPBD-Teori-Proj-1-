@@ -1,0 +1,56 @@
+"""Flow for extracting weather data from API to Silver layer."""
+
+import sys
+import time
+from pathlib import Path
+sys.path.insert(0, "/prefect")
+
+from prefect import flow
+
+from tasks.weather.extract_from_api.extract import fetch_weather_from_api
+from tasks.weather.extract_from_api.load import insert_weather_to_silver, create_weather_table
+from utils.locations import locations
+
+# TEMPORARY TEST: hanya 1 lokasi, 1 tahun
+# locations = [locations[0]]  # Uncomment to use only Alabama
+start_year_test = 2012
+end_year_test = 2015
+
+
+@flow(name="extract_weather_to_silver", log_prints=True)
+def extract_weather_to_silver(
+    start_year: int = start_year_test,
+    end_year: int = end_year_test,
+) -> int:
+    """
+    Extract weather data from Open-Meteo API to Silver layer.
+
+    Args:
+        start_year: Start year (default: 2012)
+        end_year: End year (default: 2015)
+
+    Returns:
+        Number of records inserted
+    """
+    create_weather_table()
+
+    year_batches = []
+    for year in range(start_year, end_year + 1):
+        year_batches.append((f"{year}-01-01", f"{year}-12-31"))
+
+    all_records = []
+    for i, (start_date, end_date) in enumerate(year_batches):
+        for j, loc in enumerate(locations):
+            records = fetch_weather_from_api(loc, start_date, end_date)
+            all_records.extend(records)
+            # Add delay between calls to avoid rate limiting (skip after last call)
+            if i < len(year_batches) - 1 or j < len(locations) - 1:
+                time.sleep(2)  # 2 second delay
+
+    total_inserted = insert_weather_to_silver(all_records)
+
+    return total_inserted
+
+
+if __name__ == "__main__":
+    extract_weather_to_silver.serve(name="extract-weather-to-silver")

@@ -5,8 +5,20 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-env_file = Path(__file__).parent / ".env"
-if env_file.exists():
+possible_env_paths = [
+    Path(__file__).parent / ".env",
+    Path("/prefect/app/.env"),
+    Path("/prefect/.env"),
+    Path(".env"),
+]
+
+env_file = None
+for p in possible_env_paths:
+    if p.exists():
+        env_file = p
+        break
+
+if env_file:
     _ = load_dotenv(env_file)
 
 
