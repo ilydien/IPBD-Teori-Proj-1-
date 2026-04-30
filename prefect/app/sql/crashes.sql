@@ -1,12 +1,7 @@
--- ============================================================
 -- BRONZE LAYER (Raw Data)
--- ============================================================
 
 CREATE SCHEMA IF NOT EXISTS bronze;
-DROP SCHEMA  bronze;
 
-SE
-DROP TABLE IF EXISTS bronze.fars_crashes
 CREATE TABLE IF NOT EXISTS bronze.fars_crashes (
     id SERIAL PRIMARY KEY,
     year INTEGER NOT NULL,
@@ -20,12 +15,9 @@ CREATE TABLE IF NOT EXISTS bronze.fars_crashes (
 );
 
 CREATE INDEX IF NOT EXISTS idx_bronze_fars_crashes_state_year 
-    ON bronze.fars_crashes (state_code, start_year, end_year);
+    ON bronze.fars_crashes (state_code, year);
 
--- ============================================================
 -- SILVER LAYER (Cleaned/Deduplicated Data)
--- ============================================================
-
 CREATE SCHEMA IF NOT EXISTS silver;
 
 -- Table: Crash Case

@@ -1,6 +1,4 @@
--- ============================================================
 -- GOLD LAYER (Business-Level Joins & Aggregations)
--- ============================================================
 
 CREATE SCHEMA IF NOT EXISTS gold;
 

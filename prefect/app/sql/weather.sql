@@ -1,6 +1,4 @@
--- ============================================================
--- SILVER LAYER (Cleaned/Deduplicated Data)
--- ============================================================
+-- Weather data from Open-Meteo API (cleaned/processed)
 
 CREATE SCHEMA IF NOT EXISTS silver;
 
