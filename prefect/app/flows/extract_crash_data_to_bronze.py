@@ -25,7 +25,7 @@ def execute_tasks(state_code: int, year: int, format_data: str = "json") -> int:
         year=year,
         state_code=state_code,
     ):
-        print(f"⏭️  Skipping: Data already exists for state {state_code}, year {year}")
+        print(f"Skipping: Data already exists for state {state_code}, year {year}")
         return 0
 
     # Step 3: Fetch crash data from FARS API

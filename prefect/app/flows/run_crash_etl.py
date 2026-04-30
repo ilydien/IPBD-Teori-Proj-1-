@@ -12,8 +12,8 @@ def run_crash_etl(
     stateCode: int, startYear: int, endYear: int, formatData: str = "json"
 ) -> dict:
     """
-    Run complete crash ETL pipeline: API → Bronze → Silver → Daily.
-    
+    Run complete crash ETL pipeline: API -> Bronze -> Silver -> Daily.
+
     Step 1: Fetch from FARS API and load to Bronze layer
     Step 2: Transform Bronze data to Silver layer
     Step 3: Aggregate to daily level

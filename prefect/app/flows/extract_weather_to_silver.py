@@ -52,7 +52,7 @@ def extract_weather_to_silver(
                 year=year,
                 location_name=loc["name"],
             ):
-                print(f"⏭️  Skipping: Data already exists for {loc['name']}, year {year}")
+                print(f"Skipping: Data already exists for {loc['name']}, year {year}")
                 continue
 
             records = fetch_weather_from_api(loc, start_date, end_date)

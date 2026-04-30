@@ -77,7 +77,7 @@ class Settings:
         missing = [var for var in required if not getattr(cls, var)]
 
         if missing:
-            print(f"⚠️ Missing environment variables: {missing}")
+            print(f"Missing environment variables: {missing}")
             return False
         return True
 

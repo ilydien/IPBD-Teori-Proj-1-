@@ -48,7 +48,7 @@ def save_checkpoint(
             f.write(str(data))
 
     logger = get_run_logger()
-    logger.info(f"💾 Checkpoint saved: {filename}")
+    logger.info(f"Checkpoint saved: {filename}")
 
     return filename
 
@@ -82,7 +82,7 @@ def log_metrics(metrics: dict[str, Any], prefix: str = "") -> None:
 
     for key, value in metrics.items():
         metric_name = f"{prefix}.{key}" if prefix else key
-        logger.info(f"📊 Metric - {metric_name}: {value}")
+        logger.info(f"Metric - {metric_name}: {value}")
 
 
 def check_data_exists(
