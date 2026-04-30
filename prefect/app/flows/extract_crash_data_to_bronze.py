@@ -2,6 +2,7 @@
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, "/prefect")
 
 from prefect import flow
@@ -11,11 +12,6 @@ from tasks.crashes.extract_from_api.load import insert_raw_to_database
 
 
 def execute_tasks(state_code: int, year: int, format_data: str = "json") -> int:
-    # Ensure Bronze table exists
-    from tasks.crashes.bronze.create_bronze import create_bronze_table
-    create_bronze_table()
-
-    # Check if data already exists in bronze layer
     from utils.helpers import check_data_exists
 
     if check_data_exists(

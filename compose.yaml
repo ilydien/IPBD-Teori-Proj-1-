@@ -62,7 +62,8 @@ services:
           "CMD",
           "python",
           "-c",
-          "import urllib.request as u; u.urlopen('http://${HOST_IP-127.0.0.1}:4200/api/health', timeout=1)",
+          "import urllib.request as u;
+            u.urlopen('http://${HOST_IP-127.0.0.1}:4200/api/health', timeout=1)",
         ]
       interval: 30s
       timeout: 10s
@@ -145,11 +146,13 @@ services:
       - "${HOST_IP-127.0.0.1}:5433:5432"
     volumes:
       - ./lakehouse/postgres:/var/lib/postgresql
+      - ./prefect/app/sql:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_LAKEHOUSE_USER} -d ${POSTGRES_LAKEHOUSE_DB}",
+          "pg_isready -U ${POSTGRES_LAKEHOUSE_USER-postgres} -d
+            ${POSTGRES_LAKEHOUSE_DB-postgres}",
         ]
       interval: 5s
       timeout: 5s

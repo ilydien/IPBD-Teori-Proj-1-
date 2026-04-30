@@ -30,8 +30,6 @@ def extract_weather_to_silver(
     Returns:
         Number of records inserted
     """
-    create_weather_table()
-
     year_batches = []
     for year in range(start_year, end_year + 1):
         year_batches.append((f"{year}-01-01", f"{year}-12-31"))
