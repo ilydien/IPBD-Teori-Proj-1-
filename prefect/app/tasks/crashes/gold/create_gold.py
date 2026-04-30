@@ -96,11 +96,11 @@ def populate_gold_table(
     params = {}
 
     if year is not None:
-        conditions.append("dc.year = :year")
+        conditions.append("dw.year = :year")
         params["year"] = year
 
     if state_name is not None:
-        conditions.append("dc.state_name = :state_name")
+        conditions.append("dw.location_name = :state_name")
         params["state_name"] = state_name
 
     where_clause = ""
@@ -113,13 +113,13 @@ def populate_gold_table(
              temperature_2m_max, temperature_2m_min, precipitation_sum,
              temperature_2m_avg, total_crashes)
         SELECT
-            dc.day, dc.month, dc.year, dc.state_name AS state,
+            dw.day, dw.month, dw.year, dw.location_name AS state,
             dw.longitude, dw.latitude,
             dw.temperature_2m_max, dw.temperature_2m_min, dw.precipitation_sum,
             (dw.temperature_2m_max + dw.temperature_2m_min) / 2 AS temperature_2m_avg,
-            dc.total_crashes
-        FROM silver.daily_crashes dc
-        JOIN silver.daily_weather dw
+            COALESCE(dc.total_crashes, 0) AS total_crashes
+        FROM silver.daily_weather dw
+        LEFT JOIN silver.daily_crashes dc
             ON dc.year = dw.year
             AND dc.month = dw.month
             AND dc.day = dw.day
