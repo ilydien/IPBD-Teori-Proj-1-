@@ -163,7 +163,6 @@ IPBD-Teori(2)/
 ### **Step 1: Start Containers**
 
 ```bash
-cd "D:\!!COLEGE SAUCE\Semester 4\IPBD\IPBD-Teori(2)"
 docker compose up -d
 ```
 
