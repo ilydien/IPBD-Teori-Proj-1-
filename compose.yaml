@@ -103,37 +103,6 @@ services:
     command: prefect worker start --pool local-pool
     restart: on-failure
 
-  # garage:
-  #   image: docker.io/dxflrs/garage:v2.3.0
-  #   restart: always
-  #   environment:
-  #     GARAGE_RPC_SECRET: "${GARAGE_RPC_SECRET-garagerpcsecretgaragerpcsecretgaragerpcsecretgaragerpcsecretgara}"
-  #     GARAGE_ADMIN_SECRET: "${GARAGE_ADMIN_SECRET-superadminsecret}"
-  #     GARAGE_DEFAULT_BUCKET: "${GARAGE_BUCKET-lakebucket}"
-  #     GARAGE_DEFAULT_ACCESS_KEY: "GK${GARAGE_DEFAULT_ACCESS_KEY-garagedefaultaccesskeygaragedefa}"
-  #     GARAGE_DEFAULT_SECRET_KEY: "${GARAGE_DEFAULT_SECRET_KEY-garagedefaultsecretkeygaragedefaultsecretkeygaragedefaultsecretk}"
-  #   env_file: .env
-  #   ports:
-  #     - "${HOST_IP-127.0.0.1}:3900:3900"
-  #     - "${HOST_IP-127.0.0.1}:3901:3901"
-  #   volumes:
-  #     - ./lakehouse/garage/etc:/etc
-  #     - ./lakehouse/garage/var/lib/garage/meta:/var/lib/garage/meta
-  #     - ./lakehouse/garage/var/lib/garage/data:/var/lib/garage/data
-  #   command: /garage server --single-node --default-bucket
-
-  # garage-webui:
-  #   image: docker.io/khairul169/garage-webui:1.1.0
-  #   container_name: garage-webui
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ./lakehouse/garage/etc/garage.toml:/etc/garage.toml:ro
-  #   ports:
-  #     - "${HOST_IP-127.0.0.1}:3909:3909"
-  #   environment:
-  #     API_BASE_URL: "http://garage:3903"
-  #     S3_ENDPOINT_URL: "http://garage:3900"
-
   postgres-lakehouse:
     image: docker.io/postgres:18.3-alpine3.23
     restart: always
