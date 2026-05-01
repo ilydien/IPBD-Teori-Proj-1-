@@ -25,9 +25,7 @@ if env_file:
 class Settings:
     """Application settings loaded from environment variables."""
 
-    # ============================================================
     # Database Settings
-    # ============================================================
     LAKEHOUSE_HOST: str = os.getenv("POSTGRES_LAKEHOUSE_HOST", "localhost")
     LAKEHOUSE_PORT: str = os.getenv("POSTGRES_LAKEHOUSE_PORT", "5432")
     LAKEHOUSE_USER: str = os.getenv("POSTGRES_LAKEHOUSE_USER", "postgres")
@@ -38,23 +36,17 @@ class Settings:
     DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "10"))
     DB_POOL_PRE_PING: bool = os.getenv("DB_POOL_PRE_PING", "True").lower() == "true"
 
-    # ============================================================
     # Prefect Settings
-    # ============================================================
     PREFECT_BLOCK_NAME: str = os.getenv("PREFECT_BLOCK_NAME", "postgres-demo-block")
     DEFAULT_TABLE_NAME: str = os.getenv("DEFAULT_TABLE_NAME", "posts")
     DEFAULT_LIMIT: int = int(os.getenv("DEFAULT_LIMIT", "20"))
 
-    # ============================================================
     # API Fetch Settings
-    # ============================================================
     API_TIMEOUT: int = int(os.getenv("API_TIMEOUT", "30"))
     API_MAX_RETRIES: int = int(os.getenv("API_MAX_RETRIES", "3"))
     API_RETRY_DELAYS: list[int] = [2, 5, 10]
 
-    # ============================================================
     # Derived Properties
-    # ============================================================
     @classmethod
     def get_db_connection_string(cls, async_driver: bool = False) -> str:
         """Build database connection string from settings."""
