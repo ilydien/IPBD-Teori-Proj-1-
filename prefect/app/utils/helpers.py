@@ -105,12 +105,10 @@ def check_data_exists(
     Returns:
         True if data exists, False otherwise
     """
-    from config.database import db_manager
+    from utils.database import db_manager
     from sqlalchemy import text
 
-    query = text(
-        f"SELECT COUNT(*) FROM {schema_name}.{table_name} WHERE year = :year"
-    )
+    query = text(f"SELECT COUNT(*) FROM {schema_name}.{table_name} WHERE year = :year")
     params = {"year": year}
 
     if state_code is not None:
